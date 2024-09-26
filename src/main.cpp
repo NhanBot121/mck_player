@@ -39,14 +39,16 @@ int main() {
             std::cout << "Exiting the application..." << std::endl;
             break;  // Exit the loop to terminate the application
         }
-        else if (command == "open" && args.size() == 2) {
-            Directory::openDirectory(args[1]);
+        else if (command == "ls" && args.size() == 1) {
+            Directory::listDirectory();
         }
         else if (command == "playlist") {
             if (args.size() >= 2) {
                 std::string action = args[1];
                 if (action == "-l") {
                     Playlist::listPlaylists();
+                } else if (action == "-v" && args.size() == 3) {
+                    Playlist::viewPlaylist(args[2]);
                 } else if (action == "-c" && args.size() == 3) {
                     Playlist::createPlaylist(args[2]);
                 } else if (action == "-u" && args.size() == 3) {
@@ -89,7 +91,7 @@ int main() {
                 Player::autoNext(args[1] == "--on"); // boolean ?
             }
         }
-        
+
         else if (command == "volume") {
             if (args.size() == 2) {
                 if (args[1] == "up") {

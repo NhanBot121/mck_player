@@ -5,9 +5,9 @@
 
 class Metadata {
 public:
-    void viewMetadata(std::string fname);
-    void changeMetadata(std::string fname);
-    void addMetadata(std::string fname);
+    static void viewMetadata(std::string fname);
+    static void changeMetadata(std::string fname);
+    static void addMetadata(std::string fname);
 };
 
 #endif

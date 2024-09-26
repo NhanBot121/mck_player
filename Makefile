@@ -1,43 +1,53 @@
-# Compiler
+# Compiler and flags
 CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -g
 
-# Compiler flags
-CXXFLAGS = -std=c++23 -Iinc
-
-# Directories
-SRC_DIR = src
-INC_DIR = inc
-OBJ_DIR = obj
-BIN_DIR = bin
+# Libraries and include directories
+LIBS = -lSDL2 -lSDL2_mixer -ltag
+INCLUDES = -I/usr/include/taglib
 
 # Source files
-SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
+SRC_DIR = src
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 
-# Object files (compiled .o files)
-OBJ_FILES = $(SRC_FILES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+# Object files
+OBJS = $(SRCS:.cpp=.o)
 
-# Executable
-TARGET = $(BIN_DIR)/program
+# Executable name
+TARGET = mck_player
 
-# Default rule
+# Installation directory (system-wide path)
+INSTALL_DIR = /usr/local/bin
+
+# Build the executable
 all: $(TARGET)
 
-# Rule to create the executable
-$(TARGET): $(OBJ_FILES)
-	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJ_FILES)
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) $(LIBS)
 
-# Rule to compile .cpp files into .o files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Clean up compiled files
-clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
-
-# Phony targets
-.PHONY: all clean run
+# Compile source files into object files
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 run: all
-	@./$(TARGET)
+	./$(TARGET)
+
+# Install the executable system-wide
+install: $(TARGET)
+	@echo "Installing $(TARGET) to $(INSTALL_DIR)..."
+	@sudo cp $(TARGET) $(INSTALL_DIR)
+	@sudo chmod +x $(INSTALL_DIR)/$(TARGET)
+	@echo "$(TARGET) installed successfully!"
+
+# Uninstall the executable
+uninstall:
+	@echo "Uninstalling $(TARGET) from $(INSTALL_DIR)..."
+	@sudo rm -f $(INSTALL_DIR)/$(TARGET)
+	@echo "$(TARGET) uninstalled successfully!"
+
+# Clean up build files
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+# Phony targets
+.PHONY: all clean

@@ -3,8 +3,8 @@
 
 class Volume {
 public:
-    void upVolume();
-    void downVolume();
+    static void upVolume();
+    static void downVolume();
 
 };
 

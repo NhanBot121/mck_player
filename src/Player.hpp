@@ -5,12 +5,12 @@
 
 class Player {
 public: 
-    void play(std::string fname);
-    void play();
-    void pause();
-    void prev();
-    void next();
-    bool autoNext(bool is_auto_on);
+    static void play(std::string fname);
+    static void play();
+    static void pause();
+    static void prev();
+    static void next();
+    static bool autoNext(bool is_auto_on);
 };
 
 #endif

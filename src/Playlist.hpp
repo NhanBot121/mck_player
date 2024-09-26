@@ -4,11 +4,13 @@
 #include <string>
 
 class Playlist {
+
 public:
-    void listPlaylists();
-    void createPlaylist(std::string pname);
-    void updatePlaylist(std::string pname);
-    void deletePlaylist(std::string pname);
+    static void listPlaylists();
+    static void viewPlaylist(std::string pname);
+    static void createPlaylist(std::string pname);
+    static void updatePlaylist(std::string pname);
+    static void deletePlaylist(std::string pname);
 };
 
 #endif
