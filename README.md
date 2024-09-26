@@ -33,3 +33,4 @@ Create a CLI application for Linux that serves as a basic media files and video 
     + Control volume by ADC 
     + Can Play, pause, stop, next, previous music by pressed buttons.
     + Display information song on board screen when song is playing.
+
