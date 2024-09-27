@@ -8,9 +8,13 @@ class Player {
     std::vector<std::string> playlist;
 
     bool auto_next = false;
+    bool is_playing = false;
 
 public: 
     static void playAudio(const std::string& fileName);
+    static void pauseAudio();
+    static void resumeAudio();
+
     static void playVideo(const std::string& fileName);
 
     static void playPlaylist(const std::string& playlist);

@@ -30,8 +30,12 @@ void Player::playAudio(const std::string &fileName)
         if (Mix_PlayMusic(music, 1) == -1) {
             std::cerr << "Failed to play music: " << Mix_GetError() << std::endl;
         } else {
-            std::cout << "Playing: " << fileName << std::endl;
-            SDL_Delay(5000); // Play for 5 seconds
+            // std::cout << "Playing: " << fileName << std::endl;
+            // Loop until the music finishes playing
+            // is_playing = true;
+            while (Mix_PlayingMusic()) {
+                SDL_Delay(100); // Small delay to prevent busy-waiting
+            }
         }
         Mix_FreeMusic(music); // Free the music after playing
     }
@@ -41,6 +45,22 @@ void Player::playAudio(const std::string &fileName)
     SDL_Quit();
 }
 
+// Pause the audio playback
+void Player::pauseAudio() {
+    if (Mix_PlayingMusic() == 1) {
+        Mix_PauseMusic();
+        std::cout << "Music paused." << std::endl;
+    }
+}
+
+// Resume the audio playback
+void Player::resumeAudio() {
+    if (Mix_PausedMusic() == 1) {
+        Mix_ResumeMusic();
+        std::cout << "Music resumed." << std::endl;
+    }
+}
+
 void Player::playVideo(const std::string &fileName)
 {
     return;
@@ -48,6 +68,7 @@ void Player::playVideo(const std::string &fileName)
 
 void Player::playPlaylist(const std::string &playlist)
 {
+
 }
 
 void Player::play()

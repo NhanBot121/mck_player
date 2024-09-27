@@ -8,6 +8,7 @@
 #include "Volume.hpp"
 
 #include <vector>
+#include <thread>
 
 // Function to split input into arguments
 std::vector<std::string> splitInput(const std::string& input) {
@@ -72,7 +73,15 @@ int main() {
             if (args.size() == 3) {
                 std::string action = args[1];
                 if (action == "--audio"){
-                    Player::playAudio(args[2]);
+                    std::thread  playing{Player::playAudio, args[2]}; 
+
+                    playing.detach();
+
+                    continue;;
+                    
+                    // Player::playAudio(args[2]); // -> put this on other thread
+                    //                             // -> main thread continue waiting for command
+
                 } else if (action == "--video")
                     Player::playVideo(args[2]);
             } else {
@@ -80,7 +89,10 @@ int main() {
             }
         }
         else if (command == "pause") {
-            Player::pause();
+            Player::pauseAudio();
+        }
+        else if (command == "resume") {
+            Player::resumeAudio();
         }
         else if (command == "next") {
             Player::next();

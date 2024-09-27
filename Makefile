@@ -46,8 +46,10 @@ uninstall:
 	@echo "$(TARGET) uninstalled successfully!"
 
 # Clean up build files
-clean:
+clean: uninstall
 	rm -f $(OBJS) $(TARGET)
+	
+
 
 # Phony targets
 .PHONY: all clean
