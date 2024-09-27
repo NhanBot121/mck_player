@@ -3,7 +3,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -g
 
 # Libraries and include directories
-LIBS = -lSDL2 -lSDL2_mixer -ltag
+LIBS = -lSDL2 -lSDL2_mixer -ltag -lavformat -lavcodec -lavutil
 INCLUDES = -I/usr/include/taglib
 
 # Source files

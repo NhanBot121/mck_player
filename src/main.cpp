@@ -63,8 +63,8 @@ int main() {
                 std::string action = args[1];
                 if (action == "-v") {
                     Metadata::viewMetadata(args[2]);
-                } else if (action == "-u") {
-                    Metadata::updateMetadata(args[2]);
+                } else if (action == "-e") {
+                    Metadata::editMetadata(args[2]);
                 } 
             }
         }
