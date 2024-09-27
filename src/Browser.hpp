@@ -1,7 +1,7 @@
-#ifndef DIRECTORY_HPP
-#define DIRECTORY_HPP
+#ifndef BROWSER_HPP
+#define BROWSER_HPP
 
-class Directory {
+class Browser {
 public:
     // show all files in that dir and its sub-dir
     // pagination = 25

@@ -2,9 +2,10 @@
 #define PLAYLIST_HPP
 
 #include <string>
+#include <vector>
 
 class Playlist {
-
+    std::vector<std::string> all_playlists;
 public:
     static void listPlaylists();
     static void viewPlaylist(const std::string& playlistName);

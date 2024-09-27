@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "Directory.hpp"
+#include "Browser.hpp"
 #include "Playlist.hpp"
 #include "Metadata.hpp"
 #include "Player.hpp"
@@ -40,7 +40,7 @@ int main() {
             break;  // Exit the loop to terminate the application
         }
         else if (command == "ls" && args.size() == 1) {
-            Directory::listDirectory();
+            Browser::listDirectory();
         }
         else if (command == "playlist") {
             if (args.size() >= 2) {
@@ -69,8 +69,12 @@ int main() {
             }
         }
         else if (command == "play") {
-            if (args.size() == 2) {
-                Player::play(args[1]);
+            if (args.size() == 3) {
+                std::string action = args[1];
+                if (action == "--audio"){
+                    Player::playAudio(args[2]);
+                } else if (action == "--video")
+                    Player::playVideo(args[2]);
             } else {
                 Player::play();
             }

@@ -1,4 +1,4 @@
-#include "Directory.hpp"
+#include "Browser.hpp"
 #include <iostream>
 #include <filesystem>
 #include <vector>
@@ -10,14 +10,14 @@ bool isMediaFile(const std::filesystem::path& path) {
     return std::find(mediaExtensions.begin(), mediaExtensions.end(), path.extension().string()) != mediaExtensions.end();
 }
 
-void Directory::listDirectory()
+void Browser::listDirectory()
 {
-    std::string directoryName = "./";
+    std::string dirName = "./";
     std::vector<std::filesystem::path> mediaFiles;
 
     try {
         // Collect all media files recursively
-        for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryName)) {
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(dirName)) {
             if (entry.is_regular_file() && isMediaFile(entry.path())) {
                 // store the paths
                 mediaFiles.push_back(entry.path());
@@ -25,7 +25,7 @@ void Directory::listDirectory()
         }
 
         if (mediaFiles.empty()) {
-            std::cout << "No media files found is the directory and its subdirectory." << std::endl;
+            std::cout << "No media files found is the Browser and its subBrowser." << std::endl;
             return;
         }
 
