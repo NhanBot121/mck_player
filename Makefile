@@ -14,7 +14,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 
 # Executable name
-TARGET = mck_player
+TARGET = mck
 
 # Installation directory (system-wide path)
 INSTALL_DIR = /usr/local/bin

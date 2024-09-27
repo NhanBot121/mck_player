@@ -71,8 +71,10 @@ bool isMediaInPlaylist(const std::string& playlistName, const std::string& media
 }
 
 void addToPlaylist(const std::string& playlistName, const std::string& mediaPath) {
-    if (!isMediaInPlaylist(playlistName, mediaPath)) {
-        std::ofstream file(playlistName, std::ios::app); // Open file in append mode
+    std::string playlistPath = PLAYLIST_DIR + playlistName + ".txt";
+
+    if (!isMediaInPlaylist(playlistPath, mediaPath)) {
+        std::ofstream file(playlistPath, std::ios::app); // Open file in append mode
         if (file.is_open()) {
             file << mediaPath << std::endl;
             file.close();
@@ -83,12 +85,14 @@ void addToPlaylist(const std::string& playlistName, const std::string& mediaPath
 }
 
 void removeFromPlaylist(const std::string& playlistName, const std::string& mediaPath) {
-    if (!isMediaInPlaylist(playlistName, mediaPath)) {
+    std::string playlistPath = PLAYLIST_DIR + playlistName + ".txt";
+
+    if (!isMediaInPlaylist(playlistPath, mediaPath)) {
         std::cout << "Media not in playlist '" << playlistName << "'." << std::endl;
         return;
-    } 
+    }
 
-    std::ifstream file(playlistName);
+    std::ifstream file(playlistPath);
     if (!file.is_open()) {
         std::cerr << "Unable to open file: " << playlistName << std::endl;
         return;    
@@ -108,7 +112,7 @@ void removeFromPlaylist(const std::string& playlistName, const std::string& medi
     file.close();
 
     // Write the updated lines back to the file
-    std::ofstream outFile(playlistName);
+    std::ofstream outFile(playlistPath);
     if (!outFile.is_open()) {
         std::cerr << "Unable to open file for writing: " << playlistName << std::endl;
         return;
@@ -136,12 +140,14 @@ void Playlist::updatePlaylist(std::string playlistName)
             if (choice == 'a') {
                 std::string mediaPath;
                 std::cout << "\nEnter the media file to add in playlist: ";
-                std::cin >> mediaPath;
+                std::cin.ignore();
+                getline(std::cin, mediaPath);
                 addToPlaylist(playlistName, mediaPath);
             } else if (choice == 'r') {
                 std::string mediaPath;
                 std::cout << "\nEnter media file to be remove from playlist: ";
-                std::cin >> mediaPath;
+                std::cin.ignore();
+                getline(std::cin, mediaPath);
                 removeFromPlaylist(playlistName, mediaPath);
             } else if (choice == 'q') {
                 std::cout << "\nExit updating playlist..." << std::endl;
@@ -152,11 +158,11 @@ void Playlist::updatePlaylist(std::string playlistName)
 }
 
 void Playlist::deletePlaylist(std::string playlistName) {
-    std::string fullPath = "playlists/" + playlistName;
+    std::string fullPath = PLAYLIST_DIR + playlistName + ".txt";
 
     // Check if the playlist file exists
     if (!std::filesystem::exists(fullPath)) {
-        std::cout << "Playlist '" << playlistName << "' does not exist in the 'playlists/' folder." << std::endl;
+        std::cout << "Playlist '" << playlistName << "' does not exist." << std::endl;
         return;
     }
 
