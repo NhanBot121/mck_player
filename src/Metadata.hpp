@@ -5,9 +5,14 @@
 
 class Metadata {
 public:
-    static void viewMetadata(std::string fname);
-    static void changeMetadata(std::string fname);
-    static void addMetadata(std::string fname);
+    static void viewMetadata(const std::string& fileName);
+    static void editMetadata(const std::string& filename);
+
+private:
+    static bool isAudioFile(const std::string& fileName);
+    static bool isVideoFile(const std::string& fileName);
+    static void viewAudioMetadata(const std::string& fileName);
+    static void viewVideoMetadata(const std::string& fileName);
 };
 
-#endif
+#endif // METADATA_HPP

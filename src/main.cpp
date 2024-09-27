@@ -61,13 +61,11 @@ int main() {
         else if (command == "metadata") {
             if (args.size() == 3) {
                 std::string action = args[1];
-                if (action == "-view") {
+                if (action == "-v") {
                     Metadata::viewMetadata(args[2]);
-                } else if (action == "--change") {
-                    Metadata::changeMetadata(args[2]);
-                } else if (action == "--add") {
-                    Metadata::addMetadata(args[2]);
-                }
+                } else if (action == "-u") {
+                    Metadata::updateMetadata(args[2]);
+                } 
             }
         }
         else if (command == "play") {

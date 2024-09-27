@@ -53,6 +53,7 @@
         "filesystem": "cpp",
         "map": "cpp",
         "fstream": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "list": "cpp"
     }
 }

@@ -15,7 +15,7 @@ void Playlist::listPlaylists()
     }
 }
 
-void Playlist::viewPlaylist(std::string playlistName)
+void Playlist::viewPlaylist(const std::string& playlistName)
 {
     std::ifstream file(playlistName); // open the playlist
     if (!file.is_open()) {
@@ -32,7 +32,7 @@ void Playlist::viewPlaylist(std::string playlistName)
 }
 
 // Create empty 
-void Playlist::createPlaylist(std::string playlistName) {
+void Playlist::createPlaylist(const std::string& playlistName) {
     std::string playlistPath = PLAYLIST_DIR + playlistName + ".txt";
     
     // Check if the playlist already exists
@@ -125,7 +125,7 @@ void removeFromPlaylist(const std::string& playlistName, const std::string& medi
     std::cout << "Media removed from playlist '" << playlistName << "'." << std::endl;
 }
 
-void Playlist::updatePlaylist(std::string playlistName)
+void Playlist::updatePlaylist(const std::string& playlistName)
 {
     std::string playlistPath = PLAYLIST_DIR + playlistName + ".txt";
     if (!std::filesystem::exists(playlistPath)) {
@@ -157,7 +157,7 @@ void Playlist::updatePlaylist(std::string playlistName)
     }
 }
 
-void Playlist::deletePlaylist(std::string playlistName) {
+void Playlist::deletePlaylist(const std::string& playlistName) {
     std::string fullPath = PLAYLIST_DIR + playlistName + ".txt";
 
     // Check if the playlist file exists

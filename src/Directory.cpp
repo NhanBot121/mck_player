@@ -61,7 +61,6 @@ void Directory::listDirectory()
             } else {
                 std::cout << "Invalid choice! Just enter 'n', 'p', 'q'." << std::endl;
             }
-
         }
     } catch (const std::filesystem::filesystem_error& e) {
         std::cerr << "Error: " << e.what() << std::endl;

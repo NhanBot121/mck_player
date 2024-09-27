@@ -7,10 +7,10 @@ class Playlist {
 
 public:
     static void listPlaylists();
-    static void viewPlaylist(std::string pname);
-    static void createPlaylist(std::string pname);
-    static void updatePlaylist(std::string pname);
-    static void deletePlaylist(std::string pname);
+    static void viewPlaylist(const std::string& playlistName);
+    static void createPlaylist(const std::string& playlistName);
+    static void updatePlaylist(const std::string& playlistName);
+    static void deletePlaylist(const std::string& playlistName);
 };
 
 #endif
