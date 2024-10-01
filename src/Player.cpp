@@ -1,93 +1,150 @@
 #include "Player.hpp"
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <filesystem>
 #include <iostream>
+#include <chrono>
+#include <mutex>
 
-// just take the absolute path for now
+std::mutex terminalMutex;  // Protects terminal access between threads
 
-void Player::playAudio(const std::string &fileName)
-{
-    // Initialize SDL
+Player::Player() : curr(nullptr), is_playing(false), is_displaying(false), stopFlag(false), is_auto_next(false) {
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
-        return;
     }
 
-    // Initialize SDL_mixer
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         std::cerr << "Failed to initialize SDL_mixer: " << Mix_GetError() << std::endl;
-        SDL_Quit();
-        return;
     }
+}
 
-    // Load the audio file
-    Mix_Music* music = Mix_LoadMUS(fileName.c_str()); // Use c_str() to convert std::string to const char*
-    if (!music) {
-        std::cerr << "Failed to load music: " << Mix_GetError() << std::endl;
-    } else {
-        // Play the music
-        if (Mix_PlayMusic(music, 1) == -1) {
-            std::cerr << "Failed to play music: " << Mix_GetError() << std::endl;
-        } else {
-            // std::cout << "Playing: " << fileName << std::endl;
-            // Loop until the music finishes playing
-            // is_playing = true;
-            while (Mix_PlayingMusic()) {
-                SDL_Delay(100); // Small delay to prevent busy-waiting
-            }
-        }
-        Mix_FreeMusic(music); // Free the music after playing
-    }
-
-    // Clean up and quit SDL
+Player::~Player() {
+    stopAudioThread();
     Mix_CloseAudio();
     SDL_Quit();
 }
 
-// Pause the audio playback
-void Player::pauseAudio() {
-    if (Mix_PlayingMusic() == 1) {
+void Player::playAudio(const std::string& fileName) {
+    Mix_Music* music = Mix_LoadMUS(fileName.c_str());
+    if (!music) {
+        std::cerr << "Failed to load music: " << Mix_GetError() << std::endl;
+    } else {
+        if (Mix_PlayMusic(music, 1) == -1) {
+            std::cerr << "Failed to play music: " << Mix_GetError() << std::endl;
+        } else {
+            is_playing = true;
+            while (Mix_PlayingMusic() && !stopFlag) {
+                SDL_Delay(100);  // Small delay to prevent busy-waiting
+            }
+            is_playing = false;
+            if (is_auto_next) {
+                next();
+            }
+        }
+        Mix_FreeMusic(music);
+    }
+}
+
+void Player::startAudioThread(const std::string& fileName) {
+    stopAudioThread();  // Stop any currently playing audio
+    stopFlag = false;
+
+    audioThread = std::thread([this, fileName] {
+        playAudio(fileName);
+    });
+
+    audioThread.detach();  // Detach the thread
+}
+
+void Player::play() {
+    if (isCurrValid()) {
+        startAudioThread(*curr);
+    }
+}
+
+void Player::stopAudioThread() {
+    stopFlag = true;
+    if (audioThread.joinable()) {
+        audioThread.join();  // Wait for the audio thread to finish
+    }
+}
+
+
+// Pause the currently playing audio
+void Player::pause() {
+    if (Mix_PlayingMusic() && !Mix_PausedMusic()) {
         Mix_PauseMusic();
-        std::cout << "Music paused." << std::endl;
+        std::cout << "Audio paused." << std::endl;
+    } else {
+        std::cout << "No audio to pause or already paused." << std::endl;
     }
 }
 
-// Resume the audio playback
-void Player::resumeAudio() {
-    if (Mix_PausedMusic() == 1) {
+// Resume the paused audio
+void Player::resume() {
+    if (Mix_PausedMusic()) {
         Mix_ResumeMusic();
-        std::cout << "Music resumed." << std::endl;
+        std::cout << "Audio resumed." << std::endl;
+    } else {
+        std::cout << "No paused audio to resume." << std::endl;
     }
 }
 
-void Player::playVideo(const std::string &fileName)
+bool Player::isPlaying()
 {
-    return;
+    return is_playing;
 }
 
-void Player::playPlaylist(const std::string &playlist)
-{
-
+void Player::stop() {
+    stopAudioThread();
 }
 
-void Player::play()
-{
+void Player::next() {
+    if (isCurrValid() && curr != &playlistToPlay.back()) {
+        ++curr;
+        startAudioThread(*curr);
+    } else {
+        std::cout << "Already at the last song." << std::endl;
+    }
 }
 
-void Player::pause()
-{
+void Player::prev() {
+    if (isCurrValid() && curr != &playlistToPlay[0]) {
+        --curr;
+        startAudioThread(*curr);
+    } else {
+        std::cout << "Already at the first song." << std::endl;
+    }
 }
 
-void Player::prev()
-{
+void Player::auto_next(bool option)
+{   
+    is_auto_next = option;
 }
 
-void Player::next()
-{
+void Player::loadPlaylist(const std::string& playlistName) {
+    std::string playlistPath = PLAYLIST_DIR + playlistName + ".txt";
+    std::ifstream file(playlistPath);
+
+    if (file.is_open()) {
+        std::string line;
+        while (std::getline(file, line)) {
+            if (!line.empty()) {
+                playlistToPlay.push_back(line);
+            }
+        }
+        file.close();
+        curr = &playlistToPlay[0];  // Set the first song as the current
+    } else {
+        std::cerr << "Failed to open playlist: " << playlistPath << std::endl;
+    }
 }
 
-bool Player::autoNext(bool is_auto_on)
-{
-    return false;
+void Player::loadInDir() {
+    playlistToPlay = inDir;
+    curr = &playlistToPlay[0];
+}
+
+bool Player::isCurrValid() const {
+    return (curr && curr >= &playlistToPlay[0] && curr <= &playlistToPlay.back());
 }

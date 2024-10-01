@@ -5,13 +5,12 @@
 #include <filesystem>
 
 class Browser {
-    std::vector<std::filesystem::path> inDirMedia;
-    std::filesystem::path cwd; 
 public:
+    std::vector<std::string> inDirMedia;
+    std::string cwd; 
     // show all files in that dir and its sub-dir
     // pagination = 25
-    Browser() {
-        std::filesystem::path cwd = std::filesystem::current_path();
+    Browser() : cwd{std::filesystem::current_path().string()} {
         readMediaToVector(cwd);
     }
     void listDirectory();

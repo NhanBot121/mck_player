@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -g
+CXXFLAGS = -std=c++23 -Wall -Wextra -g
 
 # Libraries and include directories
 LIBS = -lSDL2 -lSDL2_mixer -ltag -lavformat -lavcodec -lavutil

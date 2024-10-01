@@ -32,7 +32,7 @@ void Browser::listDirectory()
         size_t end = std::min(start + filesPerPage, totalFiles);
 
         for (size_t i = start; i < end; ++i) {
-            std::cout << i + 1 << ". " << inDirMedia[i].string() << std::endl;
+            std::cout << i + 1 << ". " << inDirMedia[i] << std::endl;
         }
 
         // Pagination navigation
@@ -52,7 +52,6 @@ void Browser::listDirectory()
             std::cout << "Invalid choice! Just enter 'n', 'p', 'q'." << std::endl;
         }
     }
-
 }
 
 void Browser::readMediaToVector(std::filesystem::path cwd)
