@@ -51,50 +51,47 @@ void Playlist::createPlaylist(const std::string& playlistName) {
 }
 
 // Read media files in a playlist to a vector
-std::vector<std::string> readPlaylist(const std::string& playlistName) {
-    std::vector<std::string> lines;
-    std::ifstream file(playlistName);
+void Playlist::readPlaylistLists(const std::filesystem::path& playlistPath) {
+    std::ifstream file(playlistPath);
     if (file.is_open()) {
         std::string line;
         while (std::getline(file, line)) {
-            lines.push_back(line);
+            playlist.push_back(line);
         }
         file.close();
     }
-    return lines;
 }
 
 // Function to check if a path exists in a playlist file
-bool isMediaInPlaylist(const std::string& playlistName, const std::string& mediaPath) {
-    auto lines = readPlaylist(playlistName);
-    return std::find(lines.begin(), lines.end(), mediaPath) != lines.end();
+bool isMediaInPlaylist(const std::vector<std::filesystem::path>& playlist , const std::filesystem::path& mediaPath) {
+    return std::find(playlist.begin(), playlist.end(), mediaPath) != playlist.end();
 }
 
-void addToPlaylist(const std::string& playlistName, const std::string& mediaPath) {
-    std::string playlistPath = PLAYLIST_DIR + playlistName + ".txt";
+void Playlist::addToPlaylist(const std::filesystem::path& playlistPath, const std::filesystem::path& mediaPath) {
+    std::string playlistPath = PLAYLISTS_PATH / playlistPath / ".txt";
 
-    if (!isMediaInPlaylist(playlistPath, mediaPath)) {
+    if (!isMediaInPlaylist(playlist, mediaPath)) {
         std::ofstream file(playlistPath, std::ios::app); // Open file in append mode
         if (file.is_open()) {
             file << mediaPath << std::endl;
             file.close();
         }
     } else {
-        std::cout << "Media already exists in playlist: " << playlistName << std::endl;
+        std::cout << "Media already exists in playlist: " << playlistPath << std::endl;
     }
 }
 
-void removeFromPlaylist(const std::string& playlistName, const std::string& mediaPath) {
-    std::string playlistPath = PLAYLIST_DIR + playlistName + ".txt";
+void removeFromPlaylist(const std::filesystem::path& playlistPath, const std::filesystem::path& mediaPath) {
+    std::string playlistPath = PLAYLIST_DIR / playlistPath / ".txt";
 
     if (!isMediaInPlaylist(playlistPath, mediaPath)) {
-        std::cout << "Media not in playlist '" << playlistName << "'." << std::endl;
+        std::cout << "Media not in playlist '" << playlistPath << "'." << std::endl;
         return;
     }
 
     std::ifstream file(playlistPath);
     if (!file.is_open()) {
-        std::cerr << "Unable to open file: " << playlistName << std::endl;
+        std::cerr << "Unable to open file: " << playlistPath << std::endl;
         return;    
     }
 

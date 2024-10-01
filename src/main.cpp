@@ -25,6 +25,8 @@ int main() {
     std::string input;
     std::cout << "MCK Player. Type 'exit' to quit." << std::endl;
 
+    Browser browser;
+
     // Main loop
     while (true) {
         std::cout << "> ";  // Prompt symbol
@@ -41,7 +43,7 @@ int main() {
             break;  // Exit the loop to terminate the application
         }
         else if (command == "ls" && args.size() == 1) {
-            Browser::listDirectory();
+            browser.listDirectory();
         }
         else if (command == "playlist") {
             if (args.size() >= 2) {
