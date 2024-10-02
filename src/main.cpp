@@ -112,23 +112,23 @@ int main()
         else if (command == "player") {
             if (args.size() >= 2) {
                 std::string action = args[1];
-                if (action == "--play-playlist" && args.size() >= 3) {
+                if (action == "-pl" && args.size() >= 3) {
                     mtx.lock();
                     player.loadPlaylist(args[2]);
                     player.play();
                     mtx.unlock();
                 }
-                else if (action == "--play-cwd") {
+                else if (action == "-cwd") {
                     mtx.lock();
                     player.loadInDir();
                     player.play();
                     mtx.unlock();
                 }
-                // else if (action == "--display") {
-                //     mtx.lock();
-                //     player.display();
-                // //     mtx.unlock();
-                // }
+                else if (action == "--display") {
+                    mtx.lock();
+                    player.displayPlayBackInfo();
+                    mtx.unlock();
+                }
                 else if (action == "--next") {
                     mtx.lock();
                     player.next();

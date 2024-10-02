@@ -1,10 +1,14 @@
 #include "Player.hpp"
-#include <taglib/fileref.h>
-#include <taglib/tag.h>
+
 #include <filesystem>
 #include <iostream>
 #include <chrono>
 #include <mutex>
+
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 
 std::mutex terminalMutex;  // Protects terminal access between threads
 
@@ -33,8 +37,18 @@ void Player::playAudio(const std::string& fileName) {
             std::cerr << "Failed to play music: " << Mix_GetError() << std::endl;
         } else {
             is_playing = true;
-            while (Mix_PlayingMusic() && !stopFlag) {
-                SDL_Delay(100);  // Small delay to prevent busy-waiting
+
+            // playback info
+            curr_played_time = 0;
+            playbackInfo(fileName);
+
+            while (Mix_PlayingMusic() && !stopFlag && is_playing) {
+                //SDL_Delay(100);  // Small delay to prevent busy-waiting
+                if (!is_displaying) {  // counting in background when not displaying
+                    ++curr_played_time;
+                    std::this_thread::sleep_for(std::chrono::seconds(1)); // wait for 1 second
+                }
+               
             }
             is_playing = false;
             if (is_auto_next) {
@@ -44,6 +58,65 @@ void Player::playAudio(const std::string& fileName) {
         Mix_FreeMusic(music);
     }
 }
+
+void Player::playbackInfo(const std::string& fileName) {
+    TagLib::FileRef file(fileName.c_str());
+    if (!file.isNull() && file.tag() && file.audioProperties()) {
+        TagLib::Tag *tag = file.tag();
+        TagLib::AudioProperties *properties = file.audioProperties();
+
+        curr_title = tag->title();
+        curr_duration = properties->length();
+    }
+}
+
+
+void Player::displayPlayBackInfo() {
+    if (is_playing) {
+        is_displaying = true;
+        // Set terminal to non-blocking mode
+        struct termios oldt, newt;
+        tcgetattr(STDIN_FILENO, &oldt); // Save current terminal settings
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO); // Disable canonical mode and echo
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt); // Apply new terminal settings
+
+        // Set input mode to non-blocking
+        int oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+        // Display playback info in a loop
+        while (curr_played_time <= curr_duration) {
+            // Print playback info on the same line
+            std::cout << "\r" << curr_title << "\t" << curr_played_time << " / " << curr_duration << " (s)";
+            std::cout.flush();  // Ensure the line updates correctly
+
+            // Check if a key was pressed
+            char c;
+            if (read(STDIN_FILENO, &c, 1) > 0) {
+                // Key was pressed, break the loop
+                is_displaying = false;
+                break;
+            }
+
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // Wait for 1 second
+            ++curr_played_time; // Simulate playback progress
+        }
+
+        // Clear the line after playback finishes
+        std::cout << std::endl;
+
+        // Restore terminal settings
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // Restore old terminal settings
+        fcntl(STDIN_FILENO, F_SETFL, oldf); // Restore old input mode
+    }
+    else {
+        std::cout << "No track playing." << std::endl;
+        return;
+    }
+}
+
+
 
 void Player::startAudioThread(const std::string& fileName) {
     stopAudioThread();  // Stop any currently playing audio
@@ -64,6 +137,7 @@ void Player::play() {
 
 void Player::stopAudioThread() {
     stopFlag = true;
+    is_playing = false;
     if (audioThread.joinable()) {
         audioThread.join();  // Wait for the audio thread to finish
     }
@@ -89,6 +163,7 @@ void Player::resume() {
         std::cout << "No paused audio to resume." << std::endl;
     }
 }
+
 
 bool Player::isPlaying()
 {

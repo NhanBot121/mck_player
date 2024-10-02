@@ -11,6 +11,9 @@
 #include <filesystem>
 #include "Browser.hpp"
 
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+
 // Constant paths
 const std::string PLAYLIST_DIR = "/home/nhnbot21/ndrd/c_cpp/cdr/mck_player/src/playlists/";
 const std::string CW_DIR = std::filesystem::current_path();
@@ -32,6 +35,7 @@ public:
     void play();        // Play the current track
     void pause();       // Pause the current track
     void resume();      // Resume the paused track
+    void start_counter();
     void stop();        // Stop playback
     void next();        // Play the next track
     void prev();        // Play the previous track
@@ -43,7 +47,9 @@ public:
 
     // Display and playback info
     void display();    // Display playback info
-    void displayPlaybackInfo();  // Display detailed info about current playback
+    void playbackInfo();  // Display detailed info about current playback
+
+    void displayPlayBackInfo();
 
     // Utility methods
     bool isPlaying();  // Check if music is currently playing
@@ -55,7 +61,8 @@ private:
 
     // Audio-related private functions
     void playAudio(const std::string& fileName);  // Play audio from file
-    void stopAudioThread();  // Stop the audio playback thread
+    void playbackInfo(const std::string &fileName);
+    void stopAudioThread(); // Stop the audio playback thread
     void stopInfoThread();  // Stop the info display thread
 
     void startAudioThread(const std::string& fileName);  // Start audio playback in a new thread
@@ -74,13 +81,18 @@ private:
 
     // Flags for controlling playback and thread safety
     std::atomic<bool> is_playing{false};  // Is a song currently playing?
+    std::atomic<bool> is_displaying{false};  // Is playback info being displayed?
+
     std::atomic<bool> stopFlag{false};  // Stop flag for controlling audio and info threads
     std::atomic<bool> is_auto_next{true};  // Is auto-next enabled?
-    std::atomic<bool> is_displaying{false};  // Is playback info being displayed?
 
     // Browser instance for directory handling
     Browser browser;  // Browser object to browse media files
     std::vector<std::string> inDir = browser.inDirMedia;  // List of media files in the directory
+
+    int curr_duration;
+    int curr_played_time;
+    TagLib::String curr_title;
 };
 
 #endif // PLAYER_HPP
