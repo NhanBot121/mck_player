@@ -1,4 +1,4 @@
-# Media Browser and Player CLI Application
+# MCK PLAYER
 
 ## Overview
 
