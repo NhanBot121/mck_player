@@ -1,75 +1,44 @@
 #include "Volume.hpp"
 #include <iostream>
 
-#define MIXER_NAME "Master"  // Name of the mixer control
-
-// Constructor: Initialize the mixer
-Volume::Volume() {
-    initMixer();
+Volume::Volume() : currentVolume(64) {  // Default volume to 50% (64/128)
+    Mix_Volume(-1, currentVolume);  // Set the initial volume for all channels
+    Mix_VolumeMusic(currentVolume); // Set the initial volume for music
 }
 
-// Destructor: Clean up resources
 Volume::~Volume() {
-    closeMixer();
+    // No additional clean-up needed for volume control
 }
 
-// Initializes the ALSA mixer
-void Volume::initMixer() {
-    snd_mixer_open(&handle, 0);
-    snd_mixer_attach(handle, "default");
-    snd_mixer_selem_register(handle, nullptr, nullptr);
-    snd_mixer_load(handle);
-
-    snd_mixer_selem_id_alloca(&sid);
-    snd_mixer_selem_id_set_name(sid, MIXER_NAME);
-
-    elem = snd_mixer_find_selem(handle, sid);
-    snd_mixer_selem_get_playback_volume_range(elem, &volumeMin, &volumeMax);
-}
-
-// Closes the ALSA mixer
-void Volume::closeMixer() {
-    snd_mixer_close(handle);
-}
-
-// Gets the current volume level (0 - 100%)
-int Volume::getVolume() const {
-    long volumeValue;
-    snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &volumeValue);
-
-    // Convert the actual volume value to percentage
-    int volumePercent = static_cast<int>((volumeValue * 100) / volumeMax);
-    return volumePercent;
-}
-
-// Sets the volume to a specific level (0 - 100%)
 void Volume::setVolume(int volume) {
-    if (volume < 0 || volume > 100) {
-        std::cerr << "Volume should be between 0 and 100." << std::endl;
+    if (volume < 0 || volume > 128) {
+        std::cerr << "Volume should be between 0 and 128." << std::endl;
         return;
     }
-
-    long volumeValue = (volume * volumeMax) / 100;
-    snd_mixer_selem_set_playback_volume_all(elem, volumeValue);
+    currentVolume = volume;
+    Mix_Volume(-1, currentVolume);  // Set volume for all channels
+    Mix_VolumeMusic(currentVolume); // Set volume for music
 }
 
-void Volume::printVolume()
-{
-    std::cout << "Volume = " << getVolume() << "%" << std::endl;
+int Volume::getVolume() const {
+    // Get the actual volume from SDL for the first channel (or a specific channel)
+    int volume = Mix_Volume(-1, -1);  // Use -1 to query the current volume of all channels
+    return volume;
 }
 
-// Increase the volume by a step (e.g., 5%)
 void Volume::upVolume() {
-    int currentVolume = getVolume();
-    int newVolume = currentVolume + 5;
-    if (newVolume > 100) newVolume = 100;  // Cap at 100%
+    int newVolume = getVolume() + 5;
+    if (newVolume > 128) newVolume = 128;
     setVolume(newVolume);
 }
 
-// Decrease the volume by a step (e.g., 5%)
 void Volume::downVolume() {
-    int currentVolume = getVolume();
-    int newVolume = currentVolume - 5;
-    if (newVolume < 0) newVolume = 0;  // Cap at 0%
+    int newVolume = getVolume() - 5;
+    if (newVolume < 0) newVolume = 0;
     setVolume(newVolume);
+}
+
+void Volume::printVolume() {
+    int actualVolume = getVolume();  // Get the actual volume from SDL
+    std::cout << "Volume = " << (actualVolume * 100 / 128) << "%" << std::endl;
 }

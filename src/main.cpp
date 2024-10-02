@@ -35,7 +35,7 @@ int main()
 
     Browser browser;
     Player& player = Player::getInstance();
-    Volume volume;
+    //Volume volume;
 
     // Main loop for handling user input
     while (true) {
@@ -192,25 +192,25 @@ int main()
         else if (command == "volume") {
             if (args.size() == 1) {
                 mtx.lock();
-                volume.printVolume();
+                player.getVolume().printVolume();
                 mtx.unlock();
             }
             else if (args.size() >= 2) {
                 if (args[1] == "++") {
                     mtx.lock();
-                    volume.upVolume();
-                    volume.printVolume();
+                    player.getVolume().upVolume();
+                    player.getVolume().printVolume();
                     mtx.unlock();
                 } else if (args[1] == "--") {
                     mtx.lock();
-                    volume.downVolume();
-                    volume.printVolume();
+                    player.getVolume().downVolume();
+                    player.getVolume().printVolume();
                     mtx.unlock();
                 } else if (args[1] == "--set") {
                     mtx.lock();
                     int vol = std::stoi(args[2]);
-                    volume.setVolume(vol);
-                    volume.printVolume();
+                    player.getVolume().setVolume(vol);
+                    player.getVolume().printVolume();
                     mtx.unlock();
                 }
             }

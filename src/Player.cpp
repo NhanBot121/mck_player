@@ -20,6 +20,8 @@ Player::Player() : curr(nullptr), is_playing(false), is_displaying(false), stopF
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         std::cerr << "Failed to initialize SDL_mixer: " << Mix_GetError() << std::endl;
     }
+
+    volume.setVolume(64);
 }
 
 Player::~Player() {
@@ -122,6 +124,7 @@ void Player::startAudioThread(const std::string& fileName) {
 void Player::play() {
     if (isCurrValid()) {
         startAudioThread(*curr);
+        volume.printVolume();
     }
 }
 
@@ -170,6 +173,11 @@ bool Player::isPlaying()
 Metadata Player::getMetadata()
 {
     return curr_metadata;
+}
+
+Volume Player::getVolume()
+{
+    return volume;
 }
 
 void Player::stop() {

@@ -15,9 +15,11 @@
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 
+#include "Volume.hpp"
+
 // Constant paths
 const std::string PLAYLIST_DIR = "/home/nhnbot21/ndrd/c_cpp/cdr/mck_player/src/playlists/";
-const std::string CW_DIR = std::filesystem::current_path();
+//const std::string CW_DIR = std::filesystem::current_path();
 
 // Singleton Player class
 class Player {
@@ -47,9 +49,6 @@ public:
     void loadInDir();  // Load media files from the directory
 
     // Display and playback info
-    void display();    // Display playback info
-    void playbackInfo();  // Display detailed info about current playback
-
     void displayPlayBackInfo();
 
     // Utility methods
@@ -57,7 +56,7 @@ public:
 
     Metadata getMetadata();
 
-
+    Volume getVolume();
 
 private:
     // Private constructor to enforce Singleton
@@ -97,6 +96,8 @@ private:
     int curr_duration;
     int curr_played_time;
     TagLib::String curr_title;
+
+    Volume volume;
 
 };
 
