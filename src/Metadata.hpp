@@ -2,17 +2,38 @@
 #define METADATA_HPP
 
 #include <string>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/audioproperties.h>
 
 class Metadata {
 public:
-    static void viewMetadata(const std::string& fileName);
-    static void editMetadata(const std::string& filename);
+    // Constructors
+    Metadata(const std::string& fileName);
+    Metadata();
+    
+    // Destructor
+    ~Metadata();
+
+    // Public member functions
+    void viewMetadata() const;
+    void editMetadata();
+
+    TagLib::String get_title();
+    int get_duration();
 
 private:
-    static bool isAudioFile(const std::string& fileName);
-    static bool isVideoFile(const std::string& fileName);
-    static void viewAudioMetadata(const std::string& fileName);
-    static void viewVideoMetadata(const std::string& fileName);
+    std::string filePath;
+    TagLib::FileRef fileRef;  // FileRef for managing the audio file
+    TagLib::Tag* tag;         // For handling metadata like title, artist, etc.
+    TagLib::AudioProperties* properties;  // For handling audio properties (bitrate, length, etc.)
+
+    // Private helper functions
+    bool isAudioFile() const;
+    bool isVideoFile() const;
+    void loadAudioFileMetadata();
+    void viewAudioMetadata() const;
+    void viewVideoMetadata() const;
 };
 
 #endif // METADATA_HPP

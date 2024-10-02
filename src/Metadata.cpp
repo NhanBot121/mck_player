@@ -4,45 +4,61 @@ extern "C" {
 }
 
 #include "Metadata.hpp"
-#include <taglib/fileref.h>
-#include <taglib/tag.h>
-#include <taglib/mp4file.h>
-#include <taglib/mp4tag.h>
 #include <iostream>
 #include <filesystem>
 #include <algorithm>
 #include <vector>
 
+// Constructor to initialize the file path and load metadata if it's an audio file
+Metadata::Metadata(const std::string& fileName) 
+    : filePath(fileName), fileRef(fileName.c_str()), tag(nullptr), properties(nullptr) {
+    if (isAudioFile()) {
+        loadAudioFileMetadata();
+    }
+}
+
+// Default constructor
+Metadata::Metadata() : filePath(""), fileRef(), tag(nullptr), properties(nullptr) {}
+
+// Destructor
+Metadata::~Metadata() {}
+
+// Load audio file metadata (Tag and AudioProperties)
+void Metadata::loadAudioFileMetadata() {
+    if (!fileRef.isNull()) {
+        tag = fileRef.tag();
+        properties = fileRef.audioProperties();
+    }
+}
+
 // Helper function to check if the file is an audio file
-bool Metadata::isAudioFile(const std::string& fileName) {
+bool Metadata::isAudioFile() const {
     static const std::vector<std::string> audioExtensions = {".mp3", ".wav", ".flac", ".ogg", ".m4a"};
-    std::string extension = std::filesystem::path(fileName).extension().string();
+    std::string extension = std::filesystem::path(filePath).extension().string();
     return std::find(audioExtensions.begin(), audioExtensions.end(), extension) != audioExtensions.end();
 }
 
 // Helper function to check if the file is a video file
-bool Metadata::isVideoFile(const std::string& fileName) {
+bool Metadata::isVideoFile() const {
     static const std::vector<std::string> videoExtensions = {".mp4", ".mkv", ".avi", ".mov", ".flv"};
-    std::string extension = std::filesystem::path(fileName).extension().string();
+    std::string extension = std::filesystem::path(filePath).extension().string();
     return std::find(videoExtensions.begin(), videoExtensions.end(), extension) != videoExtensions.end();
 }
 
-// Display metadata of the given file
-void Metadata::viewMetadata(const std::string& fileName) {
-    if (isAudioFile(fileName)) {
-        viewAudioMetadata(fileName);
-    } else if (isVideoFile(fileName)) {
-        viewVideoMetadata(fileName);
+// Display metadata of the file based on its type
+void Metadata::viewMetadata() const {
+    if (isAudioFile()) {
+        viewAudioMetadata();
+    } else if (isVideoFile()) {
+        viewVideoMetadata();
     } else {
-        std::cerr << "Unsupported file type or no metadata available for file: " << fileName << std::endl;
+        std::cerr << "Unsupported file type or no metadata available for file: " << filePath << std::endl;
     }
 }
 
 // View metadata for audio files using TagLib
-void Metadata::viewAudioMetadata(const std::string& fileName) {
-    TagLib::FileRef file(fileName.c_str());
-    if (!file.isNull() && file.tag()) {
-        TagLib::Tag *tag = file.tag();
+void Metadata::viewAudioMetadata() const {
+    if (tag) {
         std::cout << "Audio Metadata:" << std::endl;
         std::cout << "Title:      " << tag->title()  << std::endl;
         std::cout << "Artist:     " << tag->artist() << std::endl;
@@ -50,21 +66,21 @@ void Metadata::viewAudioMetadata(const std::string& fileName) {
         std::cout << "Year:       " << tag->year()   << std::endl;
         std::cout << "Track:      " << tag->track()  << std::endl;
         std::cout << "Genre:      " << tag->genre()  << std::endl;
-        std::cout << "Publisher:  N/A" << std::endl; // TagLib may not support all metadata fields
     } else {
-        std::cerr << "Failed to read audio metadata for file: " << fileName << std::endl;
+        std::cerr << "Failed to read audio metadata for file: " << filePath << std::endl;
     }
 }
 
-void Metadata::viewVideoMetadata(const std::string& fileName) {
+// View metadata for video files using FFmpeg
+void Metadata::viewVideoMetadata() const {
     std::cout << "Video Metadata:" << std::endl;
-    std::cout << "File Name:  " << fileName << std::endl;
+    std::cout << "File Name:  " << filePath << std::endl;
 
     AVFormatContext* formatContext = nullptr;
 
     // Open the video file
-    if (avformat_open_input(&formatContext, fileName.c_str(), nullptr, nullptr) != 0) {
-        std::cerr << "Could not open file: " << fileName << std::endl;
+    if (avformat_open_input(&formatContext, filePath.c_str(), nullptr, nullptr) != 0) {
+        std::cerr << "Could not open file: " << filePath << std::endl;
         return;
     }
 
@@ -93,88 +109,74 @@ void Metadata::viewVideoMetadata(const std::string& fileName) {
 }
 
 // Edit metadata for audio files
-void Metadata::editMetadata(const std::string &fileName) {
-    // Check if the file exists
-    if (!std::filesystem::exists(fileName)) {
-        std::cout << "Media file doesn't exist." << std::endl;
+void Metadata::editMetadata() {
+    if (filePath.empty()) {
+        std::cerr << "No file path specified." << std::endl;
         return;
     }
 
-    // Check if it is an audio file
-    if (!isAudioFile(fileName)) {
-        std::cout << "This function only supports editing metadata for audio files." << std::endl;
+    if (!isAudioFile()) {
+        std::cerr << "Editing is only supported for audio files." << std::endl;
         return;
     }
 
-    TagLib::FileRef file(fileName.c_str());
-    if (file.isNull() || !file.tag()) {
-        std::cerr << "Failed to load the file or the file doesn't contain metadata: " << fileName << std::endl;
+    if (!tag) {
+        std::cerr << "No metadata available for editing." << std::endl;
         return;
     }
-
-    TagLib::Tag *tag = file.tag();
 
     do {
         std::string key;
         std::cout << "Enter key to edit (title, artist, album, year, track, genre): ";
         std::cin >> key;
 
-        // Convert key to lowercase for comparison
         std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 
-        // Supported keys
         if (key == "title") {
             std::string value;
-            std::cout << "Enter new value for " << key << ": ";
-            std::cin.ignore(); // Ignore newline from previous input
+            std::cout << "Enter new value for title: ";
+            std::cin.ignore();
             std::getline(std::cin, value);
             tag->setTitle(value);
-            std::cout << "Title updated to: " << value << std::endl;
         } 
         else if (key == "artist") {
             std::string value;
-            std::cout << "Enter new value for " << key << ": ";
+            std::cout << "Enter new value for artist: ";
             std::cin.ignore();
             std::getline(std::cin, value);
             tag->setArtist(value);
-            std::cout << "Artist updated to: " << value << std::endl;
         } 
         else if (key == "album") {
             std::string value;
-            std::cout << "Enter new value for " << key << ": ";
+            std::cout << "Enter new value for album: ";
             std::cin.ignore();
             std::getline(std::cin, value);
             tag->setAlbum(value);
-            std::cout << "Album updated to: " << value << std::endl;
         } 
         else if (key == "year") {
             unsigned int year;
-            std::cout << "Enter new value for " << key << ": ";
+            std::cout << "Enter new value for year: ";
             std::cin >> year;
             tag->setYear(year);
-            std::cout << "Year updated to: " << year << std::endl;
         } 
         else if (key == "track") {
             unsigned int track;
-            std::cout << "Enter new value for " << key << ": ";
+            std::cout << "Enter new value for track: ";
             std::cin >> track;
             tag->setTrack(track);
-            std::cout << "Track updated to: " << track << std::endl;
         } 
         else if (key == "genre") {
             std::string value;
-            std::cout << "Enter new value for " << key << ": ";
+            std::cout << "Enter new value for genre: ";
             std::cin.ignore();
             std::getline(std::cin, value);
             tag->setGenre(value);
-            std::cout << "Genre updated to: " << value << std::endl;
         } 
         else {
             std::cerr << "Unsupported key. Supported keys are: title, artist, album, year, track, genre." << std::endl;
         }
 
-        // Save the modified metadata
-        file.save();
+        fileRef.save();
 
         std::cout << "Do you want to edit another key? (y/n): ";
         char choice;
@@ -185,4 +187,14 @@ void Metadata::editMetadata(const std::string &fileName) {
     } while (true);
 
     std::cout << "Metadata update completed." << std::endl;
+}
+
+TagLib::String Metadata::get_title()
+{
+    return tag->title();
+}
+
+int Metadata::get_duration()
+{
+    return properties -> length();
 }

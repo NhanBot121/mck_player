@@ -10,6 +10,7 @@
 #include <atomic>
 #include <filesystem>
 #include "Browser.hpp"
+#include "Metadata.hpp"
 
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
@@ -33,6 +34,7 @@ public:
 
     // Audio control methods
     void play();        // Play the current track
+    void play(int i);
     void pause();       // Pause the current track
     void resume();      // Resume the paused track
     void start_counter();
@@ -53,6 +55,10 @@ public:
 
     // Utility methods
     bool isPlaying();  // Check if music is currently playing
+
+    Metadata getMetadata();
+
+
 
 private:
     // Private constructor to enforce Singleton
@@ -86,13 +92,17 @@ private:
     std::atomic<bool> stopFlag{false};  // Stop flag for controlling audio and info threads
     std::atomic<bool> is_auto_next{true};  // Is auto-next enabled?
 
+    Metadata curr_metadata;
+
+
     // Browser instance for directory handling
     Browser browser;  // Browser object to browse media files
-    std::vector<std::string> inDir = browser.inDirMedia;  // List of media files in the directory
+    std::vector<std::filesystem::path> inDir = browser.inDirMedia;  // List of media files in the directory
 
     int curr_duration;
     int curr_played_time;
     TagLib::String curr_title;
+
 };
 
 #endif // PLAYER_HPP

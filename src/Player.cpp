@@ -12,7 +12,7 @@
 
 std::mutex terminalMutex;  // Protects terminal access between threads
 
-Player::Player() : curr(nullptr), is_playing(false), is_displaying(false), stopFlag(false), is_auto_next(false) {
+Player::Player() : curr(nullptr), is_playing(false), is_displaying(false), stopFlag(false), is_auto_next(false){
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
     }
@@ -40,7 +40,11 @@ void Player::playAudio(const std::string& fileName) {
 
             // playback info
             curr_played_time = 0;
-            playbackInfo(fileName);
+
+            curr_metadata = Metadata(*curr);
+
+            curr_title = curr_metadata.get_title();
+            curr_duration = curr_metadata.get_duration();
 
             while (Mix_PlayingMusic() && !stopFlag && is_playing) {
                 //SDL_Delay(100);  // Small delay to prevent busy-waiting
@@ -48,7 +52,6 @@ void Player::playAudio(const std::string& fileName) {
                     ++curr_played_time;
                     std::this_thread::sleep_for(std::chrono::seconds(1)); // wait for 1 second
                 }
-               
             }
             is_playing = false;
             if (is_auto_next) {
@@ -59,16 +62,6 @@ void Player::playAudio(const std::string& fileName) {
     }
 }
 
-void Player::playbackInfo(const std::string& fileName) {
-    TagLib::FileRef file(fileName.c_str());
-    if (!file.isNull() && file.tag() && file.audioProperties()) {
-        TagLib::Tag *tag = file.tag();
-        TagLib::AudioProperties *properties = file.audioProperties();
-
-        curr_title = tag->title();
-        curr_duration = properties->length();
-    }
-}
 
 
 void Player::displayPlayBackInfo() {
@@ -135,6 +128,13 @@ void Player::play() {
     }
 }
 
+void Player::play(int i) {
+    curr = &playlistToPlay[i];
+    if (isCurrValid()) {
+        startAudioThread(*curr);
+    }
+}
+
 void Player::stopAudioThread() {
     stopFlag = true;
     is_playing = false;
@@ -168,6 +168,11 @@ void Player::resume() {
 bool Player::isPlaying()
 {
     return is_playing;
+}
+
+Metadata Player::getMetadata()
+{
+    return curr_metadata;
 }
 
 void Player::stop() {
@@ -216,7 +221,10 @@ void Player::loadPlaylist(const std::string& playlistName) {
 }
 
 void Player::loadInDir() {
-    playlistToPlay = inDir;
+    playlistToPlay = {};
+    for (const auto& path : inDir) {
+        playlistToPlay.push_back(path.string());
+    }
     curr = &playlistToPlay[0];
 }
 

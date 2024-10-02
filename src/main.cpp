@@ -97,14 +97,15 @@ int main()
         }
         else if (command == "metadata") {
             if (args.size() == 3) {
+                Metadata metadata(args[2]);
                 std::string action = args[1];
                 if (action == "-v") {
                     mtx.lock();
-                    Metadata::viewMetadata(args[2]);
+                    metadata.viewMetadata();
                     mtx.unlock();
                 } else if (action == "-e") {
                     mtx.lock();
-                    Metadata::editMetadata(args[2]);
+                    metadata.editMetadata();
                     mtx.unlock();
                 } 
             }
@@ -115,12 +116,22 @@ int main()
                 if (action == "-pl" && args.size() >= 3) {
                     mtx.lock();
                     player.loadPlaylist(args[2]);
+                    // player -pl <playlist_name> <track_number>
+                    if (args.size() == 4) {
+                        int i = std::stoi(args[3]) - 1;
+                        player.play(i);    
+                    }
                     player.play();
                     mtx.unlock();
                 }
                 else if (action == "-cwd") {
                     mtx.lock();
                     player.loadInDir();
+                    // player --cwd <track_number>
+                    if (args.size() == 3) {
+                        int i = std::stoi(args[2]) - 1;
+                        player.play(i);
+                    }
                     player.play();
                     mtx.unlock();
                 }
@@ -163,6 +174,19 @@ int main()
                     mtx.lock();
                     player.auto_next(false);
                     mtx.unlock();
+                }
+                else if (action == "--view-tag") {
+                    mtx.lock();
+                    player.getMetadata().viewMetadata();
+                    mtx.unlock();
+                }
+                else if (action == "--edit-tag") {
+                    mtx.lock();
+                    player.getMetadata().editMetadata();
+                    mtx.unlock();
+                }
+                else {
+                    std::cout << "Invalid command" << std::endl;
                 }
             }
         }

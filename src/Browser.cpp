@@ -32,7 +32,7 @@ void Browser::listDirectory()
         size_t end = std::min(start + filesPerPage, totalFiles);
 
         for (size_t i = start; i < end; ++i) {
-            std::cout << i + 1 << ". " << inDirMedia[i] << std::endl;
+            std::cout << i + 1 << ". " << inDirMedia[i].stem().string()  << std::endl;
         }
 
         // Pagination navigation

@@ -6,7 +6,7 @@
 
 class Browser {
 public:
-    std::vector<std::string> inDirMedia;
+    std::vector<std::filesystem::path> inDirMedia;
     std::string cwd; 
     // show all files in that dir and its sub-dir
     // pagination = 25
