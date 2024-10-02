@@ -53,6 +53,9 @@ int Serial::setupSerial(const char *portName) {
 // Send data to the S32K144
 void Serial::sendToS32K144(int serial_port, const std::string &data) {
     write(serial_port, data.c_str(), data.size());
+    // write played_time
+    // write duration
+    // write title
 }
 
 // Receive data from the S32K144
@@ -75,18 +78,16 @@ void Serial::Connect() {
         return;
     }
 
-    Volume vol;
     Player& player = Player::getInstance();
 
     std::string comnmand;
     while (true) {
         // Receive command form S32K144
         comnmand = receiveFromS32K144(serial_port);
-
         if (comnmand == "VOLUP") {
-            vol.upVolume();
+            player.getVolume().upVolume();
         } else if (comnmand == "VOLDOWN") {
-            vol.downVolume();
+            player.getVolume().downVolume();
         }
         // Send playback info to S32K144
         
