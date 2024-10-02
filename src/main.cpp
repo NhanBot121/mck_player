@@ -29,8 +29,8 @@ std::mutex mtx; // Mutex for synchronizing output
 int main() 
 {
     std::string input;
-    std::cout << "M[ultimedia] C[pp] K[ernel] Player." << std::endl;
-    std::cout << "Type 'exit' to quit." << std::endl;
+    std::cout << "[Multimedia-Cpp-Kernel] MCK PLAYER." << std::endl;
+    std::cout << "Type 'q' to quit." << std::endl;
     std::cout << "Type 'help' for user manual" << std::endl;
 
     Browser browser;
@@ -48,7 +48,7 @@ int main()
         std::vector<std::string> args = splitInput(input);
         std::string command = args[0];
 
-        if (command == "exit") {
+        if (command == "q") {
             std::cout << "Exiting the application..." << std::endl;
             break;  // Exit the loop to terminate the application
         }
