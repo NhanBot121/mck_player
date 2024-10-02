@@ -109,8 +109,6 @@ void Player::displayPlayBackInfo() {
     }
 }
 
-
-
 void Player::startAudioThread(const std::string& fileName) {
     stopAudioThread();  // Stop any currently playing audio
     stopFlag = false;

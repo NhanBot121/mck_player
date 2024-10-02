@@ -37,7 +37,6 @@ public:
     void play(int i);
     void pause();       // Pause the current track
     void resume();      // Resume the paused track
-    void start_counter();
     void stop();        // Stop playback
     void next();        // Play the next track
     void prev();        // Play the previous track
@@ -67,12 +66,9 @@ private:
 
     // Audio-related private functions
     void playAudio(const std::string& fileName);  // Play audio from file
-    void playbackInfo(const std::string &fileName);
     void stopAudioThread(); // Stop the audio playback thread
-    void stopInfoThread();  // Stop the info display thread
 
     void startAudioThread(const std::string& fileName);  // Start audio playback in a new thread
-    void startInfoThread();  // Start info display in a new thread
 
     // Helper methods
     bool isCurrValid() const;  // Check if the current song is valid
@@ -83,7 +79,6 @@ private:
 
     // Threads for audio playback and info display
     std::thread audioThread;
-    std::thread infoThread;
 
     // Flags for controlling playback and thread safety
     std::atomic<bool> is_playing{false};  // Is a song currently playing?

@@ -25,7 +25,6 @@ std::vector<std::string> splitInput(const std::string& input) {
 }
 
 std::mutex mtx; // Mutex for synchronizing output
-std::atomic<bool> stopDisplay(false); // Flag to stop display thread
 
 int main() 
 {
