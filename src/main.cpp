@@ -6,6 +6,7 @@
 #include "Metadata.hpp"
 #include "Player.hpp"
 #include "Volume.hpp"
+#include "Help.hpp"
 
 #include <vector>
 #include <thread>
@@ -26,11 +27,12 @@ std::vector<std::string> splitInput(const std::string& input) {
 std::mutex mtx; // Mutex for synchronizing output
 std::atomic<bool> stopDisplay(false); // Flag to stop display thread
 
-
 int main() 
 {
     std::string input;
-    std::cout << "MCK Player. Type 'exit' to quit." << std::endl;
+    std::cout << "M[ultimedia] C[pp] K[ernel] Player." << std::endl;
+    std::cout << "Type 'exit' to quit." << std::endl;
+    std::cout << "Type 'help' for user manual" << std::endl;
 
     Browser browser;
     Player& player = Player::getInstance();
@@ -81,6 +83,9 @@ int main()
                     mtx.unlock();
                 }
             }
+            else {
+                std::cout << "Invalid command, type 'help playlist' for reference." << std::endl;
+            }
         }
         else if (command == "metadata") {
             if (args.size() == 3) {
@@ -95,6 +100,9 @@ int main()
                     metadata.editMetadata();
                     mtx.unlock();
                 } 
+            }
+            else {
+                std::cout << "Invalid command, type 'help metadata' for reference." << std::endl;
             }
         }
         else if (command == "player") {
@@ -179,7 +187,7 @@ int main()
                 }
             }
             else {
-                std::cout << "Invalid commnand." << std::endl;
+                std::cout << "Invalid command, type 'help player' for reference." << std::endl;
             }
         }
         else if (command == "volume") {
@@ -207,13 +215,43 @@ int main()
                     mtx.unlock();
                 }
             }
+            else {
+                std::cout << "Invalid command, type 'help volume' for reference." << std::endl;
+            }
         }
         else if (command == "help") {
-            
+            if (args.size() == 1) {
+                mtx.lock();
+                Help::allHelp();
+                mtx.unlock();
+            }
+            else if (args.size() == 2) {
+                std::string func = args[1];
+                if (func == "playlist") {
+                    mtx.lock();
+                    Help::playlistHelp();
+                    mtx.unlock();
+                }
+                else if (func == "metadata") {
+                    mtx.lock();
+                    Help::metadataHelp();
+                    mtx.unlock();
+                }
+                else if (func == "player") {
+                    mtx.lock();
+                    Help::playerHelp();
+                    mtx.unlock();
+                }
+                else if (func == "volume") {
+                    mtx.lock();
+                    Help::volumeHelp();
+                    mtx.unlock();
+                }
+            }
         }
         else {
             mtx.lock();
-            std::cout << "Unknown command. Please try again." << std::endl;
+            std::cout << "Unknown command. Please try again. Type 'help' to know more." << std::endl;
             mtx.unlock();
         }
     }
