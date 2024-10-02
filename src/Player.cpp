@@ -129,7 +129,7 @@ void Player::play() {
 }
 
 void Player::play(int i) {
-    curr = &playlistToPlay[i];
+    curr += i;
     if (isCurrValid()) {
         startAudioThread(*curr);
     }

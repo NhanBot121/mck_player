@@ -26,17 +26,6 @@ std::vector<std::string> splitInput(const std::string& input) {
 std::mutex mtx; // Mutex for synchronizing output
 std::atomic<bool> stopDisplay(false); // Flag to stop display thread
 
-// Function to display real-time info of currently playing track
-// void displayRealTimeInfo(Player& player) {
-//     while (!stopDisplay) {
-//         if (player.isPlaying()) {
-//             mtx.lock(); // lock to prevent interface conflict with input thread
-//             player.displayPlaybackInfo();
-//             mtx.unlock();
-//         }
-//         std::this_thread::sleep_for(std::chrono::seconds(1)); // update every second
-//     }
-// }
 
 int main() 
 {
@@ -45,9 +34,7 @@ int main()
 
     Browser browser;
     Player& player = Player::getInstance();
-
-    // Start the real-time display thread
-    //std::thread displayThread(displayRealTimeInfo, std::ref(player));
+    Volume volume;
 
     // Main loop for handling user input
     while (true) {
@@ -113,11 +100,12 @@ int main()
         else if (command == "player") {
             if (args.size() >= 2) {
                 std::string action = args[1];
-                if (action == "-pl" && args.size() >= 3) {
+                if (action == "-pl") {
                     mtx.lock();
                     player.loadPlaylist(args[2]);
                     // player -pl <playlist_name> <track_number>
                     if (args.size() == 4) {
+                        player.stop();
                         int i = std::stoi(args[3]) - 1;
                         player.play(i);    
                     }
@@ -129,6 +117,7 @@ int main()
                     player.loadInDir();
                     // player --cwd <track_number>
                     if (args.size() == 3) {
+                        player.stop();
                         int i = std::stoi(args[2]) - 1;
                         player.play(i);
                     }
@@ -189,19 +178,38 @@ int main()
                     std::cout << "Invalid command" << std::endl;
                 }
             }
+            else {
+                std::cout << "Invalid commnand." << std::endl;
+            }
         }
         else if (command == "volume") {
-            if (args.size() == 2) {
-                if (args[1] == "up") {
+            if (args.size() == 1) {
+                mtx.lock();
+                volume.printVolume();
+                mtx.unlock();
+            }
+            else if (args.size() >= 2) {
+                if (args[1] == "++") {
                     mtx.lock();
-                    Volume::upVolume();
+                    volume.upVolume();
+                    volume.printVolume();
                     mtx.unlock();
-                } else if (args[1] == "down") {
+                } else if (args[1] == "--") {
                     mtx.lock();
-                    Volume::downVolume();
+                    volume.downVolume();
+                    volume.printVolume();
+                    mtx.unlock();
+                } else if (args[1] == "--set") {
+                    mtx.lock();
+                    int vol = std::stoi(args[2]);
+                    volume.setVolume(vol);
+                    volume.printVolume();
                     mtx.unlock();
                 }
             }
+        }
+        else if (command == "help") {
+            
         }
         else {
             mtx.lock();
@@ -209,11 +217,6 @@ int main()
             mtx.unlock();
         }
     }
-
-    // stopDisplay = true;
-    // if (displayThread.joinable()) {
-    //     displayThread.join();
-    // }
 
     return 0;
 }
