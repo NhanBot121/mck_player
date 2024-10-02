@@ -63,7 +63,6 @@ void Player::playAudio(const std::string& fileName) {
 }
 
 
-
 void Player::displayPlayBackInfo() {
     if (is_playing) {
         is_displaying = true;
