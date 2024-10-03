@@ -36,7 +36,7 @@ public:
 
     // Audio control methods
     void play();        // Play the current track
-    void play(int i);
+    void play_track(int i);
     void pause();       // Pause the current track
     void resume();      // Resume the paused track
     void stop();        // Stop playback
@@ -85,6 +85,7 @@ private:
 
     std::atomic<bool> stopFlag{false};  // Stop flag for controlling audio and info threads
     std::atomic<bool> is_auto_next{true};  // Is auto-next enabled?
+    //std::atomic<bool> is_paused{false};
 
     Metadata curr_metadata;
 

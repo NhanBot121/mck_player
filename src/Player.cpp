@@ -50,9 +50,9 @@ void Player::playAudio(const std::string& fileName) {
 
             while (Mix_PlayingMusic() && !stopFlag && is_playing) {
                 //SDL_Delay(100);  // Small delay to prevent busy-waiting
-                if (!is_displaying) {  // counting in background when not displaying
+                std::this_thread::sleep_for(std::chrono::seconds(1)); // wait for 1 second
+                if (!is_displaying && !Mix_PausedMusic()) {  // counting in background when not displaying
                     ++curr_played_time;
-                    std::this_thread::sleep_for(std::chrono::seconds(1)); // wait for 1 second
                 }
             }
             is_playing = false;
@@ -66,7 +66,7 @@ void Player::playAudio(const std::string& fileName) {
 
 
 void Player::displayPlayBackInfo() {
-    if (is_playing) {
+    if (is_playing || Mix_PausedMusic()) {
         is_displaying = true;
         // Set terminal to non-blocking mode
         struct termios oldt, newt;
@@ -94,7 +94,10 @@ void Player::displayPlayBackInfo() {
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1)); // Wait for 1 second
-            ++curr_played_time; // Simulate playback progress
+
+            if (!Mix_PausedMusic()) {
+                ++curr_played_time; // Simulate playback progress
+            }
         }
 
         // Clear the line after playback finishes
@@ -128,10 +131,12 @@ void Player::play() {
     }
 }
 
-void Player::play(int i) {
-    curr += i;
+void Player::play_track(int i) {
+    curr = &playlistToPlay[i];
     if (isCurrValid()) {
         startAudioThread(*curr);
+    } else {
+        std::cout << "Invalid action. \n";
     }
 }
 
@@ -158,6 +163,7 @@ void Player::pause() {
 void Player::resume() {
     if (Mix_PausedMusic()) {
         Mix_ResumeMusic();
+        //is_playing = true;
         std::cout << "Audio resumed." << std::endl;
     } else {
         std::cout << "No paused audio to resume." << std::endl;

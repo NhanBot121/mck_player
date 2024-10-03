@@ -110,25 +110,37 @@ int main()
                 if (action == "-pl") {
                     mtx.lock();
                     player.loadPlaylist(args[2]);
-                    // player -pl <playlist_name> <track_number>
-                    if (args.size() == 4) {
-                        player.stop();
-                        int i = std::stoi(args[3]) - 1;
-                        player.play(i);    
-                    }
+                    Playlist::viewPlaylist(args[2]);
+                    // // player -pl <playlist_name> <track_number>
+                    // if (args.size() == 4) {
+                    //     mtx.lock();
+                    //     player.stop();
+                    //     int i = std::stoi(args[3]) - 1;
+                    //     player.play_track(i);    
+                    //     mtx.unlock();
+                    // }
                     player.play();
                     mtx.unlock();
                 }
                 else if (action == "-cwd") {
                     mtx.lock();
                     player.loadInDir();
+                    browser.listDirectory();
                     // player --cwd <track_number>
-                    if (args.size() == 3) {
-                        player.stop();
-                        int i = std::stoi(args[2]) - 1;
-                        player.play(i);
-                    }
+                    // if (args.size() == 3) {
+                    //     mtx.lock();
+                    //     player.stop();
+                    //     int i = std::stoi(args[2]) - 1;
+                    //     player.play_track(i);
+                    //     mtx.unlock();
+                    // }
                     player.play();
+                    mtx.unlock();
+                }
+                else if (action == "--track" && args.size() == 3) {
+                    mtx.lock();
+                    int i = std::stoi(args[2]) - 1;
+                    player.play_track(i);
                     mtx.unlock();
                 }
                 else if (action == "--display") {
@@ -146,12 +158,12 @@ int main()
                     player.prev();
                     mtx.unlock();
                 }
-                else if (action == "--pause") {
+                else if (action == "-p") {
                     mtx.lock();
                     player.pause();
                     mtx.unlock();
                 }
-                else if (action == "--resume") {
+                else if (action == "-r") {
                     mtx.lock();
                     player.resume();
                     mtx.unlock();
