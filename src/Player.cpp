@@ -82,6 +82,7 @@ void Player::displayPlayBackInfo() {
         // Display playback info in a loop
         while (curr_played_time <= curr_duration) {
             // Print playback info on the same line
+            //std::cout << "\r" << curr_metadata.viewMetadata();
             std::cout << "\r" << curr_title << "\t" << curr_played_time << " / " << curr_duration << " (s)";
             std::cout.flush();  // Ensure the line updates correctly
 
