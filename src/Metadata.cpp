@@ -1,7 +1,7 @@
-extern "C" {
-#include <libavformat/avformat.h>
-#include <libavutil/log.h>
-}
+// extern "C" {
+// #include <libavformat/avformat.h>
+// #include <libavutil/log.h>
+// }
 
 #include "Metadata.hpp"
 #include <iostream>
@@ -49,9 +49,11 @@ bool Metadata::isVideoFile() const {
 void Metadata::viewMetadata() const {
     if (isAudioFile()) {
         viewAudioMetadata();
-    } else if (isVideoFile()) {
-        viewVideoMetadata();
-    } else {
+    } 
+    // else if (isVideoFile()) {
+    //     viewVideoMetadata();
+    // } 
+    else {
         std::cerr << "Unsupported file type or no metadata available for file: " << filePath << std::endl;
     }
 }
@@ -72,41 +74,41 @@ void Metadata::viewAudioMetadata() const {
 }
 
 // View metadata for video files using FFmpeg
-void Metadata::viewVideoMetadata() const {
-    std::cout << "Video Metadata:" << std::endl;
-    std::cout << "File Name:  " << filePath << std::endl;
+// void Metadata::viewVideoMetadata() const {
+//     std::cout << "Video Metadata:" << std::endl;
+//     std::cout << "File Name:  " << filePath << std::endl;
 
-    AVFormatContext* formatContext = nullptr;
+//     AVFormatContext* formatContext = nullptr;
 
-    // Open the video file
-    if (avformat_open_input(&formatContext, filePath.c_str(), nullptr, nullptr) != 0) {
-        std::cerr << "Could not open file: " << filePath << std::endl;
-        return;
-    }
+//     // Open the video file
+//     if (avformat_open_input(&formatContext, filePath.c_str(), nullptr, nullptr) != 0) {
+//         std::cerr << "Could not open file: " << filePath << std::endl;
+//         return;
+//     }
 
-    // Retrieve stream information
-    if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-        std::cerr << "Could not find stream information." << std::endl;
-        avformat_close_input(&formatContext);
-        return;
-    }
+//     // Retrieve stream information
+//     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
+//         std::cerr << "Could not find stream information." << std::endl;
+//         avformat_close_input(&formatContext);
+//         return;
+//     }
 
-    // Print general information
-    std::cout << "Duration: " << formatContext->duration / AV_TIME_BASE << " seconds" << std::endl;
+//     // Print general information
+//     std::cout << "Duration: " << formatContext->duration / AV_TIME_BASE << " seconds" << std::endl;
 
-    // Loop through streams to get codec and bitrate information
-    for (unsigned int i = 0; i < formatContext->nb_streams; ++i) {
-        AVStream* stream = formatContext->streams[i];
-        AVCodecParameters* codecParams = stream->codecpar;
+//     // Loop through streams to get codec and bitrate information
+//     for (unsigned int i = 0; i < formatContext->nb_streams; ++i) {
+//         AVStream* stream = formatContext->streams[i];
+//         AVCodecParameters* codecParams = stream->codecpar;
 
-        std::cout << "Stream #" << i << ": " << std::endl;
-        std::cout << " - Codec: " << avcodec_get_name(codecParams->codec_id) << std::endl;
-        std::cout << " - Bitrate: " << codecParams->bit_rate / 1000 << " kbps" << std::endl; // in kbps
-    }
+//         std::cout << "Stream #" << i << ": " << std::endl;
+//         std::cout << " - Codec: " << avcodec_get_name(codecParams->codec_id) << std::endl;
+//         std::cout << " - Bitrate: " << codecParams->bit_rate / 1000 << " kbps" << std::endl; // in kbps
+//     }
 
-    // Clean up
-    avformat_close_input(&formatContext);
-}
+//     // Clean up
+//     avformat_close_input(&formatContext);
+// }
 
 // Edit metadata for audio files
 void Metadata::editMetadata() {

@@ -33,7 +33,7 @@ private:
     bool isVideoFile() const;
     void loadAudioFileMetadata();
     void viewAudioMetadata() const;
-    void viewVideoMetadata() const;
+    //void viewVideoMetadata() const;
 };
 
 #endif // METADATA_HPP
