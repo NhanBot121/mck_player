@@ -68,36 +68,86 @@ void Player::playAudio(const std::string& fileName) {
 void Player::displayPlayBackInfo() {
     if (is_playing || Mix_PausedMusic()) {
         is_displaying = true;
+
         // Set terminal to non-blocking mode
         struct termios oldt, newt;
-        tcgetattr(STDIN_FILENO, &oldt); // Save current terminal settings
+        tcgetattr(STDIN_FILENO, &oldt);  // Save current terminal settings
         newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO); // Disable canonical mode and echo
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt); // Apply new terminal settings
+        newt.c_lflag &= ~(ICANON | ECHO);  // Disable canonical mode and echo
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);  // Apply new terminal settings
 
         // Set input mode to non-blocking
         int oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
         fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
 
         // Display playback info in a loop
-        while (curr_played_time <= curr_duration) {
-            // Print playback info on the same line
-            //std::cout << "\r" << curr_metadata.viewMetadata();
-            std::cout << "\r" << curr_title << "\t" << curr_played_time << " / " << curr_duration << " (s)";
+        while (is_displaying && curr_played_time <= curr_duration) {  // Exit when is_displaying is false or playback finishes
+            // Clear the screen to refresh the display
+            std::cout << "\033[2J\033[1;1H";  // ANSI escape codes to clear the screen and move the cursor
+
+            // Display metadata in a structured way
+            std::cout << "Title: " << curr_title << "\n";
+            std::cout << "Artist: " << curr_metadata.get_artist() << "\n";
+            std::cout << "Album: " << curr_metadata.get_album() << "\n";
+            std::cout << "Genre: " << curr_metadata.get_genre() << "\n";
+            std::cout << "Playback Time: " << curr_played_time << " / " << curr_duration << " seconds\n";
+            volume.printVolume();
+            std::string auto_ = (is_auto_next ? "on" : "off");
+            std::cout << "Auto next: " << auto_ << std::endl;; 
+            std::cout << "| [p]ause | [r]esume | [q]uit |\n"; 
+            //std::cout << "| [->] next | [<-] prev | [+] volume up | [-] volume down |\n";
             std::cout.flush();  // Ensure the line updates correctly
 
             // Check if a key was pressed
             char c;
             if (read(STDIN_FILENO, &c, 1) > 0) {
-                // Key was pressed, break the loop
-                is_displaying = false;
-                break;
+                switch (c) {
+                    case 'p':
+                        std::cout << "\nPausing playback...\n";
+                        pause();
+                        break;
+                    case 'r':
+                        std::cout << "\nResuming playback...\n";
+                        resume();
+                        break;
+                    case 27: {  // Escape sequence for arrow keys
+                        char seq[2];
+                        if (read(STDIN_FILENO, &seq[0], 1) > 0 && read(STDIN_FILENO, &seq[1], 1) > 0) {
+                            if (seq[0] == '[') {
+                                if (seq[1] == 'C') {  // Right arrow key
+                                    std::cout << "\nSkipping to the next track...\n";
+                                    next();
+                                }
+                                else if (seq[1] == 'D') {  // Left arrow key
+                                    std::cout << "\nGoing to the previous track...\n";
+                                    prev();
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    case '=': {
+                        volume.upVolume();
+                        break;
+                    }
+                    case '-': {
+                        volume.downVolume();
+                        break;
+                    }
+                    case 'q':
+                        std::cout << "\nExiting playback...\n";
+                        is_displaying = false;  // Signal loop to stop
+                        break;
+                    default:
+                        std::cout << "\nUnknown command.\n";
+                        break;
+                }
             }
 
-            std::this_thread::sleep_for(std::chrono::seconds(1)); // Wait for 1 second
-
+            // Simulate playback progress
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             if (!Mix_PausedMusic()) {
-                ++curr_played_time; // Simulate playback progress
+                ++curr_played_time;  // Update the playback time if not paused
             }
         }
 
@@ -105,14 +155,15 @@ void Player::displayPlayBackInfo() {
         std::cout << std::endl;
 
         // Restore terminal settings
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // Restore old terminal settings
-        fcntl(STDIN_FILENO, F_SETFL, oldf); // Restore old input mode
-    }
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);  // Restore old terminal settings
+        fcntl(STDIN_FILENO, F_SETFL, oldf);  // Restore old input mode
+    } 
     else {
         std::cout << "No track playing." << std::endl;
         return;
     }
 }
+
 
 void Player::startAudioThread(const std::string& fileName) {
     stopAudioThread();  // Stop any currently playing audio

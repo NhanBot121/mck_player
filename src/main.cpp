@@ -110,7 +110,7 @@ int main()
                 if (action == "-pl") {
                     mtx.lock();
                     player.loadPlaylist(args[2]);
-                    Playlist::viewPlaylist(args[2]);
+                    //Playlist::viewPlaylist(args[2]);
                     // // player -pl <playlist_name> <track_number>
                     // if (args.size() == 4) {
                     //     mtx.lock();
@@ -125,7 +125,7 @@ int main()
                 else if (action == "-cwd") {
                     mtx.lock();
                     player.loadInDir();
-                    browser.listDirectory();
+                    //browser.listDirectory();
                     // player --cwd <track_number>
                     // if (args.size() == 3) {
                     //     mtx.lock();

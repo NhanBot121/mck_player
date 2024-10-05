@@ -18,7 +18,7 @@
 #include "Volume.hpp"
 
 // Constant paths
-const std::string PLAYLIST_DIR = "/home/nhnbot21/ndrd/c_cpp/cdr/mck_player/src/playlists/";
+const std::string PLAYLIST_DIR = "/home/mandane_21/wrk/mck_player/src/playlists/";
 //const std::string CW_DIR = std::filesystem::current_path();
 
 // Singleton Player class

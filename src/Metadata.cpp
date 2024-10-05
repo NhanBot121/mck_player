@@ -200,3 +200,15 @@ int Metadata::get_duration()
 {
     return properties -> length();
 }
+
+TagLib::String Metadata::get_artist() {
+    return tag -> artist();
+}
+
+TagLib::String Metadata::get_album() {
+    return tag -> album();
+}
+
+TagLib::String Metadata::get_genre() {
+    return tag -> genre();
+}

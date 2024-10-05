@@ -21,6 +21,9 @@ public:
 
     TagLib::String get_title();
     int get_duration();
+    TagLib::String get_artist();
+    TagLib::String get_album();
+    TagLib::String get_genre();
 
 private:
     std::string filePath;
