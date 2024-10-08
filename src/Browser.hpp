@@ -6,7 +6,6 @@
 
 const std::string CW_DIR = std::filesystem::current_path();
 
-
 class Browser {
 public:
     std::vector<std::filesystem::path> inDirMedia;

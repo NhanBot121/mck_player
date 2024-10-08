@@ -7,7 +7,7 @@ void Help::allHelp()
     
     // General commands
     std::cout << "  help                 : Show this help menu\n";
-    std::cout << "  q                 : Exit the application\n";
+    std::cout << "  q                    : Exit the application\n";
     std::cout << "  ls                   : List media files in the current directory\n\n";
     
     // Playlist commands
